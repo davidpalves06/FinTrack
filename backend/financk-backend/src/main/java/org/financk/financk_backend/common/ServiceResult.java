@@ -3,15 +3,17 @@ package org.financk.financk_backend.common;
 public class ServiceResult<T> {
     private boolean success;
     private T data;
-    private String error;
+    private String errorMessage;
+    private int errorCode;
 
     public ServiceResult() {
     }
 
-    public ServiceResult(boolean success, T data, String error) {
+    public ServiceResult(boolean success, T data, String errorMessage, int errorCode) {
         this.success = success;
         this.data = data;
-        this.error = error;
+        this.errorMessage = errorMessage;
+        this.errorCode = errorCode;
     }
 
     public boolean isSuccess() {
@@ -30,11 +32,19 @@ public class ServiceResult<T> {
         this.data = data;
     }
 
-    public String getError() {
-        return error;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
-    public void setError(String error) {
-        this.error = error;
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(int errorCode) {
+        this.errorCode = errorCode;
     }
 }

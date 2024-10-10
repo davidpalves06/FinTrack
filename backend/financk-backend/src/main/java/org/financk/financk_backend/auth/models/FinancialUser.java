@@ -3,20 +3,39 @@ package org.financk.financk_backend.auth.models;
 
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "FinancialUser")
 public class FinancialUser {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)  // Hibernate will automatically generate UUIDs
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
     private String name;
+    @Column(unique = true, length = 100)
     private String email;
     private String password;
     private int age;
+//    private List<String> roles;
+    @CreationTimestamp
+    @Column(updatable = false, name = "created_at")
+    private Date createdAt;
+
+    public FinancialUser(String name, String email, String password, int age) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.age = age;
+//        this.roles = new ArrayList<>();
+    }
+
+    public FinancialUser() {
+//        this.roles = new ArrayList<>();
+    }
 
     public UUID getId() {
         return id;
@@ -53,4 +72,5 @@ public class FinancialUser {
     public void setAge(int age) {
         this.age = age;
     }
+
 }

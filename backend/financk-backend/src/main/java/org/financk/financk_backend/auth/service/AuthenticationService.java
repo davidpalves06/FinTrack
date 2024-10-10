@@ -1,28 +1,32 @@
 package org.financk.financk_backend.auth.service;
 
+import org.financk.financk_backend.auth.models.AuthenticationResponse;
 import org.financk.financk_backend.auth.models.FinancialUser;
 import org.financk.financk_backend.auth.models.FinancialUserDTO;
 import org.financk.financk_backend.auth.repository.FinancialUserRepository;
 import org.financk.financk_backend.common.ServiceResult;
+import org.financk.financk_backend.auth.security.jwt.JWTUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
+import java.util.Optional;
 
 @Service
 public class AuthenticationService {
 
     private final FinancialUserRepository financialUserRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JWTUtils jwtUtils;
 
-    public AuthenticationService(FinancialUserRepository financialUserRepository) {
+    public AuthenticationService(FinancialUserRepository financialUserRepository, JWTUtils jwtUtils) {
         this.financialUserRepository = financialUserRepository;
+        this.jwtUtils = jwtUtils;
         this.passwordEncoder = new BCryptPasswordEncoder(10);
     }
 
 
-    public ServiceResult<String> registerFinancialUser(FinancialUserDTO userDTO) {
+    public ServiceResult<AuthenticationResponse> registerFinancialUser(FinancialUserDTO userDTO) {
         String password = userDTO.getPassword();
         String encodedPassword = this.passwordEncoder.encode(password);
         FinancialUser financialUser = new FinancialUser();
@@ -30,17 +34,35 @@ public class AuthenticationService {
         financialUser.setAge(userDTO.getAge());
         financialUser.setEmail(userDTO.getEmail());
         financialUser.setName(userDTO.getName());
-        financialUserRepository.save(financialUser);
-        return new ServiceResult<>(true,"User registered.",null);
+        if (!financialUserRepository.existsByEmail(financialUser.getEmail())) {
+            financialUserRepository.save(financialUser);
+            return new ServiceResult<>(true,new AuthenticationResponse("User registered."),null,0);
+        }
+        return new ServiceResult<>(false,null,"Email already taken",1);
     }
 
-    public ServiceResult<String> loginFinancialUser(FinancialUserDTO user) {
-        //TODO: LOGIN LOGIC
-        return new ServiceResult<>(true,"User logged in.",null);
+    public ServiceResult<AuthenticationResponse> loginFinancialUser(FinancialUserDTO userDTO) {
+        Optional<FinancialUser> financialUserOptional = financialUserRepository.findByEmail(userDTO.getEmail());
+        if (financialUserOptional.isPresent()) {
+            FinancialUser financialUser = financialUserOptional.get();
+            if (passwordEncoder.matches(userDTO.getPassword(), financialUser.getPassword())) {
+                //TODO : STUDY REFRESH TOKEN AND IMPLEMENT
+                String jwtToken = jwtUtils.createToken(financialUser.getEmail());
+                return new ServiceResult<>(true,new AuthenticationResponse(jwtToken,"User logged in."),null,0);
+            }
+            else {
+                return new ServiceResult<>(false,null,"Wrong password",1);
+            }
+        }
+        else {
+            return new ServiceResult<>(false,null,"User not found",2);
+        }
     }
 
-    public ServiceResult<String> recoverPassword(FinancialUserDTO user) {
+    public ServiceResult<AuthenticationResponse> recoverPassword(FinancialUserDTO user) {
         //TODO: Recover password LOGIC
         return null;
     }
+
+
 }

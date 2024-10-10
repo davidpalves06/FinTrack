@@ -1,6 +1,6 @@
 package org.financk.financk_backend.auth.api;
 
-import org.financk.financk_backend.auth.models.FinancialUser;
+import org.financk.financk_backend.auth.models.AuthenticationResponse;
 import org.financk.financk_backend.auth.models.FinancialUserDTO;
 import org.financk.financk_backend.auth.service.AuthenticationService;
 import org.financk.financk_backend.common.ServiceResult;
@@ -22,38 +22,51 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody FinancialUserDTO user) {
+    public ResponseEntity<AuthenticationResponse> registerUser(@RequestBody FinancialUserDTO user) {
         boolean validated = AuthenticationRequestValidator.validateRegisterDTO(user);
         if (validated) {
-            ServiceResult<String> serviceResult = authenticationService.registerFinancialUser(user);
+            ServiceResult<AuthenticationResponse> serviceResult = authenticationService.registerFinancialUser(user);
             if (serviceResult.isSuccess()) {
                 return new ResponseEntity<>(serviceResult.getData(), HttpStatus.CREATED);
             }
         }
-        return new ResponseEntity<>("Could not register user", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new AuthenticationResponse("Request Malformed"), HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody FinancialUserDTO user) {
+    public ResponseEntity<AuthenticationResponse> loginUser(@RequestBody FinancialUserDTO user) {
         boolean validated = AuthenticationRequestValidator.validateLoginDTO(user);
         if (validated) {
-            ServiceResult<String> serviceResult = authenticationService.loginFinancialUser(user);
+            ServiceResult<AuthenticationResponse> serviceResult = authenticationService.loginFinancialUser(user);
             if (serviceResult.isSuccess()) {
                 return new ResponseEntity<>(serviceResult.getData(), HttpStatus.OK);
             }
         }
-        return new ResponseEntity<>("Login failed.",HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new AuthenticationResponse("Request Malformed"),HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/oauth")
+    public ResponseEntity<AuthenticationResponse> oauthLogin(@RequestBody FinancialUserDTO user) {
+        //TODO: OAuth User
+        boolean validated = AuthenticationRequestValidator.validateLoginDTO(user);
+        if (validated) {
+            ServiceResult<AuthenticationResponse> serviceResult = authenticationService.loginFinancialUser(user);
+            if (serviceResult.isSuccess()) {
+                return new ResponseEntity<>(serviceResult.getData(), HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(new AuthenticationResponse("Request Malformed"),HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/recover-password")
-    public ResponseEntity<String> recoverPassword(@RequestBody FinancialUserDTO user) {
+    public ResponseEntity<AuthenticationResponse> recoverPassword(@RequestBody FinancialUserDTO user) {
         //TODO: VALIDATE NECESSARY INFO AND HOW TO HANDLE THIS SCENARIO
-        ServiceResult<String> serviceResult = authenticationService.recoverPassword(user);
+        ServiceResult<AuthenticationResponse> serviceResult = authenticationService.recoverPassword(user);
         if (serviceResult.isSuccess()) {
             return new ResponseEntity<>(serviceResult.getData(), HttpStatus.OK);
         }
         else {
-            return new ResponseEntity<>(serviceResult.getError(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new AuthenticationResponse(serviceResult.getErrorMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 }
