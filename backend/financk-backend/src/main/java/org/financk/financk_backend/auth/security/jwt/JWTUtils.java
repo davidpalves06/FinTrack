@@ -8,11 +8,12 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Map;
 import java.util.function.Function;
 
 @Component
 public class JWTUtils {
-    public static final int JWT_EXPIRATION_TIME = 1000 * 60 * 15;
+    public static final long JWT_EXPIRATION_TIME = 1000L * 60 * 15;
     private final String secretKey;
     private final SecretKey SECRET_KEY;
 
@@ -46,10 +47,17 @@ public class JWTUtils {
         return extractExpiration(token).before(new Date());
     }
 
-    public String createToken(String subject) {
-        return Jwts.builder().subject(subject)
+    public String createAccessToken(String subject) {
+        return Jwts.builder().claim("isAccess",true).subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION_TIME))
+                .signWith(SECRET_KEY).compact();
+    }
+
+    public String createRefreshToken(String subject,long expirationTime) {
+        return Jwts.builder().claim("isRefresh",true).subject(subject)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(SECRET_KEY).compact();
     }
 

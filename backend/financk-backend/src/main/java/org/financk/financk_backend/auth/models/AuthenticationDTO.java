@@ -1,10 +1,12 @@
 package org.financk.financk_backend.auth.models;
 
-public class FinancialUserDTO {
+public class AuthenticationDTO {
     private String name;
     private String email;
     private String password;
     private int age;
+    private boolean rememberMe;
+
 
     public String getName() {
         return name;
@@ -36,5 +38,13 @@ public class FinancialUserDTO {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public boolean isRememberMe() {
+        return rememberMe;
+    }
+
+    public void setRememberMe(boolean rememberMe) {
+        this.rememberMe = rememberMe;
     }
 }

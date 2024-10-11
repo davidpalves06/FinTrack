@@ -1,6 +1,7 @@
 package org.financk.financk_backend.auth.security;
 
 import org.financk.financk_backend.auth.security.jwt.JWTAuthFilter;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,16 +26,20 @@ public class SpringSecurityConfiguration{
         // TODO: Check if CSRF AND CORS SHOULD BE ENABLED FOR A WEB API
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers( "/auth/*").permitAll();
-                    auth.requestMatchers("/*").authenticated();
-                })
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public FilterRegistrationBean<JWTAuthFilter> JWTAuthRegistration(JWTAuthFilter filter) {
+        FilterRegistrationBean<JWTAuthFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 }

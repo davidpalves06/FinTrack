@@ -1,7 +1,7 @@
 package org.financk.financk_backend.auth.api;
 
 import org.financk.financk_backend.auth.models.AuthenticationResponse;
-import org.financk.financk_backend.auth.models.FinancialUserDTO;
+import org.financk.financk_backend.auth.models.AuthenticationDTO;
 import org.financk.financk_backend.auth.service.AuthenticationService;
 import org.financk.financk_backend.common.ServiceResult;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> registerUser(@RequestBody FinancialUserDTO user) {
+    public ResponseEntity<AuthenticationResponse> registerUser(@RequestBody AuthenticationDTO user) {
         boolean validated = AuthenticationRequestValidator.validateRegisterDTO(user);
         if (validated) {
             ServiceResult<AuthenticationResponse> serviceResult = authenticationService.registerFinancialUser(user);
@@ -34,7 +34,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> loginUser(@RequestBody FinancialUserDTO user) {
+    public ResponseEntity<AuthenticationResponse> loginUser(@RequestBody AuthenticationDTO user) {
         boolean validated = AuthenticationRequestValidator.validateLoginDTO(user);
         if (validated) {
             ServiceResult<AuthenticationResponse> serviceResult = authenticationService.loginFinancialUser(user);
@@ -46,7 +46,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/oauth")
-    public ResponseEntity<AuthenticationResponse> oauthLogin(@RequestBody FinancialUserDTO user) {
+    public ResponseEntity<AuthenticationResponse> oauthLogin(@RequestBody AuthenticationDTO user) {
         //TODO: OAuth User
         boolean validated = AuthenticationRequestValidator.validateLoginDTO(user);
         if (validated) {
@@ -59,7 +59,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/recover-password")
-    public ResponseEntity<AuthenticationResponse> recoverPassword(@RequestBody FinancialUserDTO user) {
+    public ResponseEntity<AuthenticationResponse> recoverPassword(@RequestBody AuthenticationDTO user) {
         //TODO: VALIDATE NECESSARY INFO AND HOW TO HANDLE THIS SCENARIO
         ServiceResult<AuthenticationResponse> serviceResult = authenticationService.recoverPassword(user);
         if (serviceResult.isSuccess()) {

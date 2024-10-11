@@ -1,27 +1,27 @@
 package org.financk.financk_backend.auth.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 public class AuthenticationResponse {
-    private String token;
+    private String accessToken;
     private String message;
+    private String refreshToken;
 
     public AuthenticationResponse(String message) {
         this.message = message;
-        this.token = null;
+        this.accessToken = null;
     }
 
-    public AuthenticationResponse(String token, String message) {
-        this.token = token;
+    public AuthenticationResponse(String accessToken, String message,String refreshToken) {
+        this.accessToken = accessToken;
         this.message = message;
+        this.refreshToken = refreshToken;
     }
 
-    public String getToken() {
-        return token;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     public String getMessage() {
@@ -30,5 +30,13 @@ public class AuthenticationResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

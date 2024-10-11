@@ -1,5 +1,6 @@
 package org.financk.financk_backend.auth.security.jwt;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,18 +27,23 @@ public class JWTAuthFilter extends OncePerRequestFilter {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
             Boolean validated = jwtUtils.validateToken(token);
-            if (validated) {
+            Boolean isAccess = jwtUtils.extractClaim(token, (claims -> (Boolean) claims.get("isAccess")));
+            if (validated && isAccess) {
                 String email = jwtUtils.extractEmail(token);
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, null, List.of());
                 authenticationToken.setAuthenticated(true);
                 SecurityContextHolder.getContext()
                         .setAuthentication(authenticationToken);
-            }
-            else {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                filterChain.doFilter(request,response);
                 return;
             }
         }
-        filterChain.doFilter(request,response);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String requestPath = request.getRequestURI();
+        return requestPath.equals("/auth/register");
     }
 }
