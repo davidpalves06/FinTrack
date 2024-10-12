@@ -8,12 +8,13 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.Map;
 import java.util.function.Function;
 
 @Component
 public class JWTUtils {
-    public static final long JWT_EXPIRATION_TIME = 1000L * 60 * 15;
+    public static final long ACCESS_EXPIRATION_TIME = 1000L * 60 * 15;
+    public static final long REFRESH_EXPIRATION_TIME = 1000 * 60 * 60 * 6;
+    public static final long REFRESH_REMEMBER_ME_EXPIRATION_TIME = 1000L * 60 * 1440 * 30;
     private final String secretKey;
     private final SecretKey SECRET_KEY;
 
@@ -50,14 +51,19 @@ public class JWTUtils {
     public String createAccessToken(String subject) {
         return Jwts.builder().claim("isAccess",true).subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION_TIME))
+                .expiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRATION_TIME))
                 .signWith(SECRET_KEY).compact();
     }
 
-    public String createRefreshToken(String subject,long expirationTime) {
-        return Jwts.builder().claim("isRefresh",true).subject(subject)
+    public String createRefreshToken(String subject, boolean rememberMe) {
+        Date expirationDate;
+        if (rememberMe) expirationDate = new Date(System.currentTimeMillis() + REFRESH_REMEMBER_ME_EXPIRATION_TIME);
+        else expirationDate = new Date(System.currentTimeMillis() + REFRESH_EXPIRATION_TIME);
+        return Jwts.builder().claim("isRefresh",true)
+                .claim("rememberMe",rememberMe)
+                .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expirationTime))
+                .expiration(expirationDate)
                 .signWith(SECRET_KEY).compact();
     }
 

@@ -24,12 +24,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> registerUser(@RequestBody AuthenticationDTO user) {
+    public ResponseEntity<AuthenticationResponse> registerUser(@RequestBody AuthenticationDTO authDTO) {
         log.info("{} Register request received", LOG_TITLE);
-        boolean validated = AuthenticationRequestValidator.validateRegisterDTO(user);
+        boolean validated = AuthenticationRequestValidator.validateRegisterDTO(authDTO);
         if (validated) {
             log.debug("{} Request is valid, proceeding to registering the user", LOG_TITLE);
-            ServiceResult<AuthenticationResponse> serviceResult = authenticationService.registerFinancialUser(user);
+            ServiceResult<AuthenticationResponse> serviceResult = authenticationService.registerFinancialUser(authDTO);
             if (serviceResult.isSuccess()) {
                 log.info("{} User registered successfully", LOG_TITLE);
                 return new ResponseEntity<>(serviceResult.getData(), HttpStatus.CREATED);
@@ -43,12 +43,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> loginUser(@RequestBody AuthenticationDTO user) {
+    public ResponseEntity<AuthenticationResponse> loginUser(@RequestBody AuthenticationDTO authDTO) {
         log.info("{} Login request received", LOG_TITLE);
-        boolean validated = AuthenticationRequestValidator.validateLoginDTO(user);
+        boolean validated = AuthenticationRequestValidator.validateLoginDTO(authDTO);
         if (validated) {
             log.debug("{} Request is valid, proceeding to logging in the user", LOG_TITLE);
-            ServiceResult<AuthenticationResponse> serviceResult = authenticationService.loginFinancialUser(user);
+            ServiceResult<AuthenticationResponse> serviceResult = authenticationService.loginFinancialUser(authDTO);
             if (serviceResult.isSuccess()) {
                 log.info("{} Login successfully", LOG_TITLE);
                 return new ResponseEntity<>(serviceResult.getData(), HttpStatus.OK);
@@ -65,12 +65,31 @@ public class AuthenticationController {
         return createBadRequestResponse();
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthenticationResponse> refreshToken(@RequestBody AuthenticationDTO authDTO) {
+        log.info("{} Refresh token request received", LOG_TITLE);
+        String refreshToken = authDTO.getRefreshToken();
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return createBadRequestResponse();
+        }
+        else {
+            ServiceResult<AuthenticationResponse> serviceResult = authenticationService.refreshToken(refreshToken);
+            if (serviceResult.isSuccess()) {
+                log.info("{} Refresh token successfully", LOG_TITLE);
+                return new ResponseEntity<>(serviceResult.getData(), HttpStatus.OK);
+            }
+            else {
+                return new ResponseEntity<>(new AuthenticationResponse(serviceResult.getErrorMessage()),HttpStatus.UNAUTHORIZED);
+            }
+        }
+    }
+
     @PostMapping("/oauth")
-    public ResponseEntity<AuthenticationResponse> oauthLogin(@RequestBody AuthenticationDTO user) {
+    public ResponseEntity<AuthenticationResponse> oauthLogin(@RequestBody AuthenticationDTO authDTO) {
         //TODO: OAuth User
-        boolean validated = AuthenticationRequestValidator.validateLoginDTO(user);
+        boolean validated = AuthenticationRequestValidator.validateLoginDTO(authDTO);
         if (validated) {
-            ServiceResult<AuthenticationResponse> serviceResult = authenticationService.loginFinancialUser(user);
+            ServiceResult<AuthenticationResponse> serviceResult = authenticationService.loginFinancialUser(authDTO);
             if (serviceResult.isSuccess()) {
                 return new ResponseEntity<>(serviceResult.getData(), HttpStatus.OK);
             }

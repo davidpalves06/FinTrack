@@ -17,8 +17,7 @@ import java.util.Optional;
 @Slf4j
 public class AuthenticationService {
     private static final String LOG_TITLE = "[AuthenticationService] -";
-    public static final long REFRESH_EXPIRATION_TIME = 1000 * 60 * 60 * 6;
-    public static final long REFRESH_REMEMBER_ME_EXPIRATION_TIME = 1000L * 60 * 1440 * 30;
+
     private final FinancialUserRepository financialUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTUtils jwtUtils;
@@ -60,9 +59,9 @@ public class AuthenticationService {
                 String refreshToken;
                 log.debug("{} Generating Refresh Token", LOG_TITLE);
                 if (userDTO.isRememberMe()) {
-                    refreshToken = jwtUtils.createRefreshToken(financialUser.getEmail(),REFRESH_REMEMBER_ME_EXPIRATION_TIME);
+                    refreshToken = jwtUtils.createRefreshToken(financialUser.getEmail(),true);
                 }
-                else refreshToken = jwtUtils.createRefreshToken(financialUser.getEmail(), REFRESH_EXPIRATION_TIME);
+                else refreshToken = jwtUtils.createRefreshToken(financialUser.getEmail(), false);
                 log.debug("{} Generating Access Token", LOG_TITLE);
                 String accessToken = jwtUtils.createAccessToken(financialUser.getEmail());
                 return new ServiceResult<>(true,new AuthenticationResponse(accessToken,"User logged in.",refreshToken),null,0);
@@ -76,6 +75,25 @@ public class AuthenticationService {
             log.debug("{} User does not exist", LOG_TITLE);
             return new ServiceResult<>(false,null,"User not found",2);
         }
+    }
+
+    public ServiceResult<AuthenticationResponse> refreshToken(String token) {
+        Boolean validated = jwtUtils.validateToken(token);
+        Boolean isRefresh = jwtUtils.extractClaim(token, (claims -> (Boolean) claims.get("isRefresh")));
+        String email = jwtUtils.extractEmail(token);
+        if (isRefresh && validated) {
+            log.debug("{} Generating Refresh Token", LOG_TITLE);
+            String refreshToken;
+            Boolean rememberMe = jwtUtils.extractClaim(token, (claims -> (Boolean) claims.get("rememberMe")));
+            if (rememberMe) {
+                refreshToken = jwtUtils.createRefreshToken(email, true);
+            }
+            else refreshToken = jwtUtils.createRefreshToken(email, false);
+            log.debug("{} Generating Access Token", LOG_TITLE);
+            String accessToken = jwtUtils.createAccessToken(email);
+            return new ServiceResult<>(true,new AuthenticationResponse(accessToken,"Refreshed tokens.",refreshToken),null,0);
+        }
+        return new ServiceResult<>(false,null,"Invalid Refresh Token",1);
     }
 
     public ServiceResult<AuthenticationResponse> recoverPassword(AuthenticationDTO user) {
