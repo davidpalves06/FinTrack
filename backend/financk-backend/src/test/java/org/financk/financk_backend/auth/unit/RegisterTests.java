@@ -39,7 +39,7 @@ public class RegisterTests {
         AuthenticationDTO authenticationDTO = new AuthenticationDTO();
         authenticationDTO.setEmail("test@test.com");
         authenticationDTO.setPassword("Password123");
-        authenticationDTO.setAge(20);
+        authenticationDTO.setUsername("TestUser");
         authenticationDTO.setName("Test Name");
 
         ResponseEntity<AuthenticationResponse> response = authenticationController.registerUser(authenticationDTO);
@@ -52,7 +52,7 @@ public class RegisterTests {
         AuthenticationDTO authenticationDTO = new AuthenticationDTO();
         authenticationDTO.setEmail("test");
         authenticationDTO.setPassword("Password123");
-        authenticationDTO.setAge(20);
+        authenticationDTO.setUsername("TestUser");
         authenticationDTO.setName("Test Name");
 
         ResponseEntity<AuthenticationResponse> response = authenticationController.registerUser(authenticationDTO);
@@ -79,7 +79,7 @@ public class RegisterTests {
         AuthenticationDTO authenticationDTO = new AuthenticationDTO();
         authenticationDTO.setEmail("test@test.com");
         authenticationDTO.setPassword("");
-        authenticationDTO.setAge(20);
+        authenticationDTO.setUsername("TestUser");
         authenticationDTO.setName("Test Name");
 
         ResponseEntity<AuthenticationResponse> response = authenticationController.registerUser(authenticationDTO);
@@ -100,6 +100,8 @@ public class RegisterTests {
         response = authenticationController.registerUser(authenticationDTO);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
+        authenticationDTO.setPassword("Pas2WO");
+
         response = authenticationController.registerUser(authenticationDTO);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
@@ -109,7 +111,7 @@ public class RegisterTests {
         AuthenticationDTO authenticationDTO = new AuthenticationDTO();
         authenticationDTO.setEmail("test@test.com");
         authenticationDTO.setPassword("Password123");
-        authenticationDTO.setAge(20);
+        authenticationDTO.setUsername("TestUser");
         authenticationDTO.setName(" Test");
 
         ResponseEntity<AuthenticationResponse> response = authenticationController.registerUser(authenticationDTO);
@@ -137,11 +139,11 @@ public class RegisterTests {
     }
 
     @Test
-    public void testRegisterFinancialUserFailingDueToBadAge() {
+    public void testRegisterFinancialUserFailingDueToBadUsername() {
         AuthenticationDTO authenticationDTO = new AuthenticationDTO();
         authenticationDTO.setEmail("test@test.com");
         authenticationDTO.setPassword("Password123");
-        authenticationDTO.setAge(10);
+        authenticationDTO.setUsername("Test");
         authenticationDTO.setName("Test Name");
 
         ResponseEntity<AuthenticationResponse> response = authenticationController.registerUser(authenticationDTO);
@@ -153,7 +155,7 @@ public class RegisterTests {
         AuthenticationDTO authenticationDTO = new AuthenticationDTO();
         authenticationDTO.setEmail("test@test.com");
         authenticationDTO.setPassword("Password123");
-        authenticationDTO.setAge(20);
+        authenticationDTO.setUsername("TestUser");
         authenticationDTO.setName("Test Name");
 
         when(financialUserRepository.existsByEmail("test@test.com")).thenReturn(true);
@@ -161,5 +163,21 @@ public class RegisterTests {
         ResponseEntity<AuthenticationResponse> response = authenticationController.registerUser(authenticationDTO);
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertEquals("Email already taken",response.getBody().getMessage());
+    }
+
+    @Test
+    public void testRegisterFinancialUserFailingDueToExistingUsername() {
+        AuthenticationDTO authenticationDTO = new AuthenticationDTO();
+        authenticationDTO.setEmail("test@test.com");
+        authenticationDTO.setPassword("Password123");
+        authenticationDTO.setUsername("TestUser");
+        authenticationDTO.setName("Test Name");
+
+        when(financialUserRepository.existsByEmail("test@test.com")).thenReturn(false);
+        when(financialUserRepository.existsByUsername("TestUser")).thenReturn(true);
+
+        ResponseEntity<AuthenticationResponse> response = authenticationController.registerUser(authenticationDTO);
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("Username already taken",response.getBody().getMessage());
     }
 }

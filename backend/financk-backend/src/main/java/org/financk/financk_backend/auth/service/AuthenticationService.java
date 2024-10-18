@@ -36,10 +36,13 @@ public class AuthenticationService {
         FinancialUser financialUser = new FinancialUser();
         financialUser.setPassword(encodedPassword);
         log.error(encodedPassword);
-        financialUser.setAge(userDTO.getAge());
+        financialUser.setUsername(userDTO.getUsername());
         financialUser.setEmail(userDTO.getEmail());
         financialUser.setName(userDTO.getName());
         if (!financialUserRepository.existsByEmail(financialUser.getEmail())) {
+            if (financialUserRepository.existsByUsername(financialUser.getUsername())) {
+                return new ServiceResult<>(false,null,"Username already taken",2);
+            }
             log.debug("{} Saving user in database", LOG_TITLE);
             financialUserRepository.save(financialUser);
             return new ServiceResult<>(true,new AuthenticationResponse("User registered."),null,0);
@@ -58,10 +61,7 @@ public class AuthenticationService {
                 log.debug("{} Password matches", LOG_TITLE);
                 String refreshToken;
                 log.debug("{} Generating Refresh Token", LOG_TITLE);
-                if (userDTO.isRememberMe()) {
-                    refreshToken = jwtUtils.createRefreshToken(financialUser.getEmail(),true);
-                }
-                else refreshToken = jwtUtils.createRefreshToken(financialUser.getEmail(), false);
+                refreshToken = jwtUtils.createRefreshToken(financialUser.getEmail());
                 log.debug("{} Generating Access Token", LOG_TITLE);
                 String accessToken = jwtUtils.createAccessToken(financialUser.getEmail());
                 return new ServiceResult<>(true,new AuthenticationResponse(accessToken,"User logged in.",refreshToken),null,0);
@@ -83,12 +83,7 @@ public class AuthenticationService {
         String email = jwtUtils.extractEmail(token);
         if (isRefresh && validated) {
             log.debug("{} Generating Refresh Token", LOG_TITLE);
-            String refreshToken;
-            Boolean rememberMe = jwtUtils.extractClaim(token, (claims -> (Boolean) claims.get("rememberMe")));
-            if (rememberMe) {
-                refreshToken = jwtUtils.createRefreshToken(email, true);
-            }
-            else refreshToken = jwtUtils.createRefreshToken(email, false);
+            String refreshToken = jwtUtils.createRefreshToken(email);
             log.debug("{} Generating Access Token", LOG_TITLE);
             String accessToken = jwtUtils.createAccessToken(email);
             return new ServiceResult<>(true,new AuthenticationResponse(accessToken,"Refreshed tokens.",refreshToken),null,0);

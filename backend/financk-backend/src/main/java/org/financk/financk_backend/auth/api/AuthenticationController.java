@@ -38,6 +38,10 @@ public class AuthenticationController {
                 log.info("{} Registration failed because email was already taken.", LOG_TITLE);
                 return new ResponseEntity<>(new AuthenticationResponse(serviceResult.getErrorMessage()), HttpStatus.CONFLICT);
             }
+            if (serviceResult.getErrorCode() == 2) {
+                log.info("{} Registration failed because username was already taken.", LOG_TITLE);
+                return new ResponseEntity<>(new AuthenticationResponse(serviceResult.getErrorMessage()), HttpStatus.CONFLICT);
+            }
         }
         return createBadRequestResponse();
     }

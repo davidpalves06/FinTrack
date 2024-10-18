@@ -55,12 +55,9 @@ public class JWTUtils {
                 .signWith(SECRET_KEY).compact();
     }
 
-    public String createRefreshToken(String subject, boolean rememberMe) {
-        Date expirationDate;
-        if (rememberMe) expirationDate = new Date(System.currentTimeMillis() + REFRESH_REMEMBER_ME_EXPIRATION_TIME);
-        else expirationDate = new Date(System.currentTimeMillis() + REFRESH_EXPIRATION_TIME);
+    public String createRefreshToken(String subject) {
+        Date expirationDate = new Date(System.currentTimeMillis() + REFRESH_REMEMBER_ME_EXPIRATION_TIME);
         return Jwts.builder().claim("isRefresh",true)
-                .claim("rememberMe",rememberMe)
                 .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(expirationDate)

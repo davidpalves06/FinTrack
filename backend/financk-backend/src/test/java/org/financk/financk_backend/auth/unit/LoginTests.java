@@ -103,6 +103,8 @@ public class LoginTests {
         response = authenticationController.loginUser(authenticationDTO);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
+        authenticationDTO.setPassword("Pass1");
+
         response = authenticationController.loginUser(authenticationDTO);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
@@ -133,31 +135,6 @@ public class LoginTests {
         when(financialUserRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
         ResponseEntity<AuthenticationResponse> response = authenticationController.loginUser(authenticationDTO);
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-
     }
 
-    @Test
-    public void testLoginFinancialUserRememberMe() {
-        JWTUtils jwtUtils = new JWTUtils();
-        AuthenticationDTO authenticationDTO = new AuthenticationDTO();
-        authenticationDTO.setEmail("test@test.com");
-        authenticationDTO.setPassword("Password123");
-        authenticationDTO.setRememberMe(false);
-
-        FinancialUser mockUser = new FinancialUser();
-        mockUser.setEmail("test@test.com");
-        //ENCODED PASSWORD123
-        mockUser.setPassword("$2a$10$ckQWdJFx7qJnhnYskCAApubnuX9JSq/uWWFKnnMbEp/BABv/b6JFK");
-
-        when(financialUserRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
-        ResponseEntity<AuthenticationResponse> response = authenticationController.loginUser(authenticationDTO);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 7)).after(jwtUtils.extractExpiration(response.getBody().getRefreshToken())));
-
-        authenticationDTO.setRememberMe(true);
-
-        response = authenticationController.loginUser(authenticationDTO);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 8)).before(jwtUtils.extractExpiration(response.getBody().getRefreshToken())));
-    }
 }

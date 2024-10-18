@@ -9,8 +9,6 @@ public class AuthenticationDTO {
     private String name;
     private String email;
     private String password;
-    private int age;
-    private boolean rememberMe;
+    private String username;
     private String refreshToken;
-
 }

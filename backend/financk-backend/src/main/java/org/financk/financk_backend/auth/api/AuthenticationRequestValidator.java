@@ -14,7 +14,7 @@ public class AuthenticationRequestValidator {
         return validatePassword(userDTO.getPassword())
                 && validateName(userDTO.getName())
                 && validateEmail(userDTO.getEmail())
-                && validateAge(userDTO.getAge());
+                && validateUsername(userDTO.getUsername());
     }
 
     public static boolean validateLoginDTO(AuthenticationDTO userDTO) {
@@ -31,8 +31,8 @@ public class AuthenticationRequestValidator {
     }
 
     private static boolean validatePassword(String password) {
-        boolean validPassword = password != null && password.length() >= 6
-                && password.length() <= 16 && password.matches(PASSWORD_REGEX);
+        boolean validPassword = password != null && password.length() >= 8
+                && password.length() <= 32 && password.matches(PASSWORD_REGEX);
         if (!validPassword) {
             log.debug("{} Invalid password: {}",LOG_TITLE, password);
         }
@@ -47,10 +47,10 @@ public class AuthenticationRequestValidator {
         return validName;
     }
 
-    private static boolean validateAge(int age) {
-        boolean validAge = age >= 13;
+    private static boolean validateUsername(String username) {
+        boolean validAge = username != null && username.length() >= 6;
         if (!validAge) {
-            log.debug("{} Invalid age: {}",LOG_TITLE, age);
+            log.debug("{} Invalid username: {}",LOG_TITLE, username);
         }
         return validAge;
     }

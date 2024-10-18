@@ -31,7 +31,7 @@ public class AuthenticationIntegrationTest {
         AuthenticationDTO registerDTO = new AuthenticationDTO();
         registerDTO.setEmail("test@test.com");
         registerDTO.setPassword("Password123");
-        registerDTO.setAge(20);
+        registerDTO.setUsername("TestUser");
         registerDTO.setName("Test Name");
 
         ResponseEntity<AuthenticationResponse> registerResponse = restTemplate.postForEntity("/auth/register",registerDTO, AuthenticationResponse.class);
@@ -59,7 +59,7 @@ public class AuthenticationIntegrationTest {
         AuthenticationDTO registerDTO = new AuthenticationDTO();
         registerDTO.setEmail("test@test.com");
         registerDTO.setPassword("Password123");
-        registerDTO.setAge(20);
+        registerDTO.setUsername("TestUser");
         registerDTO.setName("Test Name");
 
         ResponseEntity<AuthenticationResponse> registerResponse = restTemplate.postForEntity("/auth/register",registerDTO, AuthenticationResponse.class);

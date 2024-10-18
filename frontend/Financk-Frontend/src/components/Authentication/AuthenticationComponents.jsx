@@ -1,22 +1,25 @@
 import styled from "@emotion/styled";
-import { InputAdornment, TextField } from "@mui/material";
-
+import { InputAdornment, TextField, IconButton } from "@mui/material";
+import { useState } from "react";
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import KeyIcon from '@mui/icons-material/Key';
 
 export const AuthContainer = styled('div')(() => ({
-  height: '100vh',
-  width: '100vw',
+  minHeight: '100vh',
+  minWidth: '100vw',
   display: 'flex',
   justifyContent: 'center',
   backgroundColor: '#42b883'
 }))
 
-export const AuthTextField = ({ TextIcon, id, label, type }) => {
+export const AuthTextField = (props) => {
   return (
-    <TextField fullWidth variant='standard' id={id} label={label} type={type} slotProps={{
+    <TextField fullWidth {...props} slotProps={{
       input: {
         startAdornment: (
           <InputAdornment position='start'>
-            {TextIcon}
+            {props.texticon}
           </InputAdornment>
         )
       }
@@ -24,3 +27,30 @@ export const AuthTextField = ({ TextIcon, id, label, type }) => {
   )
 }
 
+export const AuthPassword = (props) => {
+  const [showPassword, setShowPassword] = useState(false)
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  return (
+      <TextField {...props} type={showPassword ? 'text' : 'password'} slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position='start'>
+              <KeyIcon />
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={handleClickShowPassword}
+                edge="end"
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          )
+        }
+      }}></TextField>
+    )
+}

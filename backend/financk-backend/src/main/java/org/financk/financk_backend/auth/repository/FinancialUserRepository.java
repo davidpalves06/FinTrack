@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface FinancialUserRepository extends JpaRepository<FinancialUser, UUID> {
     boolean existsByEmail(String email);
     Optional<FinancialUser> findByEmail(String email);
+    boolean existsByUsername(String username);
 }
