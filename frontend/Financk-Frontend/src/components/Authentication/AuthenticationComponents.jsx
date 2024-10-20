@@ -32,7 +32,7 @@ export const AuthPassword = (props) => {
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   return (
-      <TextField {...props} type={showPassword ? 'text' : 'password'} slotProps={{
+      <TextField fullWidth {...props} type={showPassword ? 'text' : 'password'} slotProps={{
         input: {
           startAdornment: (
             <InputAdornment position='start'>

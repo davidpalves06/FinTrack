@@ -38,7 +38,8 @@ public class AuthenticationService {
         log.error(encodedPassword);
         financialUser.setUsername(userDTO.getUsername());
         financialUser.setEmail(userDTO.getEmail());
-        financialUser.setName(userDTO.getName());
+        String[] fullNameString = userDTO.getName().trim().split(" ");
+        financialUser.setName(fullNameString[0] + fullNameString[fullNameString.length - 1]);
         if (!financialUserRepository.existsByEmail(financialUser.getEmail())) {
             if (financialUserRepository.existsByUsername(financialUser.getUsername())) {
                 return new ServiceResult<>(false,null,"Username already taken",2);

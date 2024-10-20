@@ -131,11 +131,6 @@ public class RegisterTests {
 
         response = authenticationController.registerUser(authenticationDTO);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-
-        authenticationDTO.setName("Test Name Test");
-
-        response = authenticationController.registerUser(authenticationDTO);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test

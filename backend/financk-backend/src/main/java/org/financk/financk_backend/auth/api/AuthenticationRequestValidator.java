@@ -40,7 +40,7 @@ public class AuthenticationRequestValidator {
     }
 
     private static boolean validateName(String name) {
-        boolean validName = name != null && !name.isEmpty() && name.trim().split(" ").length == 2;
+        boolean validName = name != null && !name.isEmpty() && name.trim().split(" ").length >= 2;
         if (!validName) {
             log.debug("{} Invalid name: {}",LOG_TITLE, name);
         }
