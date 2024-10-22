@@ -1,6 +1,7 @@
 package org.financk.financk_backend.auth.security.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
@@ -12,15 +13,12 @@ import java.util.function.Function;
 
 @Component
 public class JWTUtils {
-    public static final long ACCESS_EXPIRATION_TIME = 1000L * 60 * 15;
-    public static final long REFRESH_EXPIRATION_TIME = 1000 * 60 * 60 * 6;
-    public static final long REFRESH_REMEMBER_ME_EXPIRATION_TIME = 1000L * 60 * 1440 * 30;
-    private final String secretKey;
+    public static final long ACCESS_EXPIRATION_TIME = 1000L * 60 * 1440 * 30;
     private final SecretKey SECRET_KEY;
 
     public JWTUtils() {
         //TODO : GET THIS FROM ENVIRONMENT VALUE
-        this.secretKey = "TEMPORARYSECRETKEYFORTESTINGLOCAL";
+        String secretKey = "TEMPORARYSECRETKEYFORTESTINGLOCAL";
         this.SECRET_KEY = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
 
     }
@@ -49,23 +47,18 @@ public class JWTUtils {
     }
 
     public String createAccessToken(String subject) {
-        return Jwts.builder().claim("isAccess",true).subject(subject)
+        return Jwts.builder().subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRATION_TIME))
                 .signWith(SECRET_KEY).compact();
     }
 
-    public String createRefreshToken(String subject) {
-        Date expirationDate = new Date(System.currentTimeMillis() + REFRESH_REMEMBER_ME_EXPIRATION_TIME);
-        return Jwts.builder().claim("isRefresh",true)
-                .subject(subject)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(expirationDate)
-                .signWith(SECRET_KEY).compact();
-    }
-
     // Validate the token
     public Boolean validateToken(String token) {
-        return !isTokenExpired(token);
+        try {
+            return !isTokenExpired(token);
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
 }

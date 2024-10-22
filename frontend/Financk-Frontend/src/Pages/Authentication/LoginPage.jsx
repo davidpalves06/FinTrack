@@ -1,4 +1,4 @@
-import { Typography, Paper, Stack, Button, ThemeProvider, Link, Container } from '@mui/material'
+import { Typography, Paper, Stack, Button, ThemeProvider, Link, Container, Snackbar, Alert } from '@mui/material'
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import EmailIcon from '@mui/icons-material/Email';
 
@@ -27,24 +27,39 @@ const LoginPage = () => {
   })
   const [validPassword, setValidPassword] = useState(true)
   const [validEmail, setValidEmail] = useState(true)
+  const [error, setError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(false)
   const navigate = useNavigate()
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.log("Submit");
-    const json = await fetch("http://localhost:8080/auth/login", {
-      method: 'POST',
-      body: JSON.stringify(formValues),
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    }).then((response) => {
+    try {
+      const response = await fetch("http://localhost:8080/auth/login", {
+        method: 'POST',
+        body: JSON.stringify(formValues),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials:'include'
+      })
       if (response.ok) {
-        return response.json()
-      } else alert(response.status)
-    }).catch((err) =>
-      console.log(err)
-    )
+        const responseBody = await response.json()
+        setFormValues({
+          email: '',
+          password: ''
+        })
+      console.log(responseBody);
+      navigate('/')
+    } else {
+      setErrorMessage((await response.json()).message)
+      setError(true)
+      return
+    }} catch (error) {
+      console.log(error);
+      setError(true)
+      setErrorMessage("Check your network connection and try again!")
+    }
   }
 
   const handleInputChange = (event) => {
@@ -72,6 +87,11 @@ const LoginPage = () => {
     navigate("/register")
   }
 
+  const handleSnackBarClose = () => {
+    setError(false)
+    setErrorMessage('')
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <AuthContainer theme={theme}>
@@ -88,6 +108,11 @@ const LoginPage = () => {
               <Link href='#' variant='body2' fontWeight='700' padding={'10px'}>Forgot Password?</Link>
               <Link href='/register' variant='body2' fontWeight='700' padding={'10px'} onClick={handleCreateAccount}>Create Account</Link>
             </Container>
+            <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} open={error} key={'bottom' + 'center' + 'error'} onClose={handleSnackBarClose} autoHideDuration={2000} sx={{ width: 'fit-content', margin: 'auto auto' }}>
+                <Alert severity="warning" variant="filled" sx={{ width: '100%' }}>
+                  {errorMessage}
+                </Alert>
+              </Snackbar>
           </Paper>
         </Stack>
       </AuthContainer>

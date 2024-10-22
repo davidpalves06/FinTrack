@@ -1,5 +1,6 @@
 package org.financk.financk_backend.auth.unit;
 
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.financk.financk_backend.auth.api.AuthenticationController;
 import org.financk.financk_backend.auth.models.AuthenticationDTO;
 import org.financk.financk_backend.auth.models.AuthenticationResponse;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -49,7 +51,7 @@ public class LoginTests {
         mockUser.setPassword("$2a$10$ckQWdJFx7qJnhnYskCAApubnuX9JSq/uWWFKnnMbEp/BABv/b6JFK");
 
         when(financialUserRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
-        ResponseEntity<AuthenticationResponse> response = authenticationController.loginUser(authenticationDTO);
+        ResponseEntity<AuthenticationResponse> response = authenticationController.loginUser(authenticationDTO,new MockHttpServletResponse());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("User logged in.",response.getBody().getMessage());
     }
@@ -60,22 +62,22 @@ public class LoginTests {
         authenticationDTO.setEmail("test");
         authenticationDTO.setPassword("Password123");
 
-        ResponseEntity<AuthenticationResponse> response = authenticationController.loginUser(authenticationDTO);
+        ResponseEntity<AuthenticationResponse> response = authenticationController.loginUser(authenticationDTO,new MockHttpServletResponse());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
         authenticationDTO.setEmail("test@.org");
 
-        response = authenticationController.loginUser(authenticationDTO);
+        response = authenticationController.loginUser(authenticationDTO,new MockHttpServletResponse());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
         authenticationDTO.setEmail("");
 
-        response = authenticationController.loginUser(authenticationDTO);
+        response = authenticationController.loginUser(authenticationDTO,new MockHttpServletResponse());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
         authenticationDTO.setEmail("@test.org");
 
-        response = authenticationController.loginUser(authenticationDTO);
+        response = authenticationController.loginUser(authenticationDTO,new MockHttpServletResponse());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
@@ -85,27 +87,27 @@ public class LoginTests {
         authenticationDTO.setEmail("test@test.com");
         authenticationDTO.setPassword("");
 
-        ResponseEntity<AuthenticationResponse> response = authenticationController.loginUser(authenticationDTO);
+        ResponseEntity<AuthenticationResponse> response = authenticationController.loginUser(authenticationDTO,new MockHttpServletResponse());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
         authenticationDTO.setPassword("password");
 
-        response = authenticationController.loginUser(authenticationDTO);
+        response = authenticationController.loginUser(authenticationDTO,new MockHttpServletResponse());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
         authenticationDTO.setPassword("Password");
 
-        response = authenticationController.loginUser(authenticationDTO);
+        response = authenticationController.loginUser(authenticationDTO,new MockHttpServletResponse());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
         authenticationDTO.setPassword("PASSWORD123");
 
-        response = authenticationController.loginUser(authenticationDTO);
+        response = authenticationController.loginUser(authenticationDTO,new MockHttpServletResponse());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
         authenticationDTO.setPassword("Pass1");
 
-        response = authenticationController.loginUser(authenticationDTO);
+        response = authenticationController.loginUser(authenticationDTO,new MockHttpServletResponse());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
@@ -116,7 +118,7 @@ public class LoginTests {
         authenticationDTO.setPassword("Password123");
 
         when(financialUserRepository.findByEmail("test@test.com")).thenReturn(Optional.empty());
-        ResponseEntity<AuthenticationResponse> response = authenticationController.loginUser(authenticationDTO);
+        ResponseEntity<AuthenticationResponse> response = authenticationController.loginUser(authenticationDTO,new MockHttpServletResponse());
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
     }
@@ -133,7 +135,7 @@ public class LoginTests {
         mockUser.setPassword("$2a$10$ckQWdJFx7qJnhnYskCAApubnuX9JSq/uWWFKnnMbEp/BABv/b6JFK");
 
         when(financialUserRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
-        ResponseEntity<AuthenticationResponse> response = authenticationController.loginUser(authenticationDTO);
+        ResponseEntity<AuthenticationResponse> response = authenticationController.loginUser(authenticationDTO,new MockHttpServletResponse());
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 

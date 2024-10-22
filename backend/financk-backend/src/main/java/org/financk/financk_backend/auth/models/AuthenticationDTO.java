@@ -10,5 +10,4 @@ public class AuthenticationDTO {
     private String email;
     private String password;
     private String username;
-    private String refreshToken;
 }

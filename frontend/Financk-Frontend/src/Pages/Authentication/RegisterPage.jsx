@@ -33,8 +33,9 @@ const RegisterPage = () => {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [error,setError] = useState(false)
-  const [errorMessage,setErrorMessage] = useState(false)
+  const [registerSuccess, setRegisterSuccess] = useState(false)
+  const [error, setError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(false)
   const [formValues, setFormValues] = useState({
     name: '',
     email: '',
@@ -55,7 +56,6 @@ const RegisterPage = () => {
         }
       });
       if (response.ok) {
-        const validResponse = await response.json()
         setFormValues({
           name: '',
           email: '',
@@ -65,8 +65,11 @@ const RegisterPage = () => {
         setFirstName('')
         setLastName('')
         setConfirmPassword('')
-        alert(validResponse.message)
-        navigate('/login')
+        setRegisterSuccess(true)
+
+        setTimeout(() => {
+          navigate('/login')
+        }, 2000)
       } else {
         setErrorMessage((await response.json()).message)
         setError(true)
@@ -75,11 +78,13 @@ const RegisterPage = () => {
     } catch (error) {
       console.log(error);
       setError(true)
+      setErrorMessage("Check your network connection and try again!")
     }
   }
 
   const handleSnackBarClose = () => {
     setError(false)
+    setRegisterSuccess(false)
     setErrorMessage('')
   }
 
@@ -133,6 +138,7 @@ const RegisterPage = () => {
     })
   }
 
+
   return (
     <ThemeProvider theme={theme}>
       <AuthContainer theme={theme}>
@@ -161,19 +167,16 @@ const RegisterPage = () => {
                   <AuthPassword id='Confirm-Password-input' type='password' label='Confirm Password' name='confirmPassword' error={!validPassword} value={confirmPassword} onChange={handleInputChange} required></AuthPassword>
                 </Grid2>
               </Grid2>
-              {<Snackbar anchorOrigin={{ vertical:'bottom' ,horizontal:'center' }}
-        open={error}
-        key={'bottom' + 'center'}
-        onClose={handleSnackBarClose}
-        autoHideDuration={6000}
-        >
-          <Alert
-    severity="error"
-    variant="filled"
-    sx={{ width: '100%' }}
-  >
-    {errorMessage}
-  </Alert></Snackbar>}
+              <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} open={error} key={'bottom' + 'center' + 'error'} onClose={handleSnackBarClose} autoHideDuration={2000} sx={{ width: 'fit-content', margin: 'auto auto' }}>
+                <Alert severity="warning" variant="filled" sx={{ width: '100%' }}>
+                  {errorMessage}
+                </Alert>
+              </Snackbar>
+              <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} open={registerSuccess} key={'bottom' + 'center' + 'success'} onClose={handleSnackBarClose} autoHideDuration={2000} sx={{ width: 'fit-content', margin: 'auto auto' }}>
+                <Alert severity="success" variant="filled" sx={{ width: '100%' }}>
+                  <Typography variant='body' component='div'>Registed successfully!</Typography>
+                </Alert>
+              </Snackbar>
               <PasswordRequirementsList>
                 <Typography variant='subtitle2' color='success'>
                   Password must contain:
