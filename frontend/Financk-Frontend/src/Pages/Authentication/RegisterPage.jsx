@@ -50,7 +50,7 @@ const RegisterPage = () => {
 
       const response = await fetch("http://localhost:8080/auth/register", {
         method: 'POST',
-        body: JSON.stringify(formValues),
+        body: JSON.stringify({...formValues,name: firstName + ' ' + lastName}),
         headers: {
           'Content-Type': 'application/json',
         }
@@ -69,7 +69,7 @@ const RegisterPage = () => {
 
         setTimeout(() => {
           navigate('/login')
-        }, 2000)
+        }, 1000)
       } else {
         setErrorMessage((await response.json()).message)
         setError(true)
@@ -118,18 +118,10 @@ const RegisterPage = () => {
     }
     if (name == 'firstName') {
       setFirstName(value)
-      setFormValues({
-        ...formValues,
-        name: firstName + ' ' + lastName
-      })
       return
     }
     if (name == 'lastName') {
       setLastName(value)
-      setFormValues({
-        ...formValues,
-        name: firstName + ' ' + lastName
-      })
       return
     }
     setFormValues({

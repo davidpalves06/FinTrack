@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 @Service
@@ -40,7 +41,7 @@ public class AuthenticationService {
         financialUser.setUsername(userDTO.getUsername());
         financialUser.setEmail(userDTO.getEmail());
         String[] fullNameString = userDTO.getName().trim().split(" ");
-        financialUser.setName(fullNameString[0] + fullNameString[fullNameString.length - 1]);
+        financialUser.setName(fullNameString[0] + " " + fullNameString[fullNameString.length - 1]);
         if (!financialUserRepository.existsByEmail(financialUser.getEmail())) {
             if (financialUserRepository.existsByUsername(financialUser.getUsername())) {
                 return new ServiceResult<>(false,null,"Username already taken",2);
@@ -87,6 +88,10 @@ public class AuthenticationService {
 
 
     public ServiceResult<AuthenticationResult> checkAuthentication(Cookie[] cookies) {
+        if (cookies == null) {
+            log.debug("{} No authentication cookie", LOG_TITLE);
+            return new ServiceResult<>(false,null,"User not authenticated",1);
+        }
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals("authToken")) {
                 String token = cookie.getValue();

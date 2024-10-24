@@ -8,6 +8,7 @@ import { theme, PaperCustomization, validatePassword } from '../../components/Au
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { useState } from 'react';
+import { useAuthentication } from '../../components/Authentication/AuthenticationProvider';
 
 const LoginForm = styled('form')(() => ({
   display: 'flex',
@@ -30,35 +31,21 @@ const LoginPage = () => {
   const [error, setError] = useState(false)
   const [errorMessage, setErrorMessage] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuthentication()
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Submit");
-    try {
-      const response = await fetch("http://localhost:8080/auth/login", {
-        method: 'POST',
-        body: JSON.stringify(formValues),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials:'include'
+    const response = await login(formValues)
+    if (response.success) {
+      setFormValues({
+        email: '',
+        password: ''
       })
-      if (response.ok) {
-        const responseBody = await response.json()
-        setFormValues({
-          email: '',
-          password: ''
-        })
-      console.log(responseBody);
       navigate('/')
-    } else {
-      setErrorMessage((await response.json()).message)
+    }
+    else {
+      setErrorMessage(response.message)
       setError(true)
-      return
-    }} catch (error) {
-      console.log(error);
-      setError(true)
-      setErrorMessage("Check your network connection and try again!")
     }
   }
 
@@ -96,7 +83,7 @@ const LoginPage = () => {
     <ThemeProvider theme={theme}>
       <AuthContainer theme={theme}>
         <Stack flex='column' justifyContent='center'>
-          <Paper sx={{...PaperCustomization,padding:'10px 30px'}} color='white' elevation={24} square={false}>
+          <Paper sx={{ ...PaperCustomization, padding: '10px 30px' }} color='white' elevation={24} square={false}>
             <LockPersonIcon color='success' fontSize='large' sx={{ margin: 'auto auto' }}></LockPersonIcon>
             <Typography variant='h4' component='h1' textAlign='center' color='#4c9173' m={'auto auto'}>Welcome!</Typography>
             <LoginForm onSubmit={handleSubmit}>
@@ -109,10 +96,10 @@ const LoginPage = () => {
               <Link href='/register' variant='body2' fontWeight='700' padding={'10px'} onClick={handleCreateAccount}>Create Account</Link>
             </Container>
             <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} open={error} key={'bottom' + 'center' + 'error'} onClose={handleSnackBarClose} autoHideDuration={2000} sx={{ width: 'fit-content', margin: 'auto auto' }}>
-                <Alert severity="warning" variant="filled" sx={{ width: '100%' }}>
-                  {errorMessage}
-                </Alert>
-              </Snackbar>
+              <Alert severity="warning" variant="filled" sx={{ width: '100%' }}>
+                {errorMessage}
+              </Alert>
+            </Snackbar>
           </Paper>
         </Stack>
       </AuthContainer>

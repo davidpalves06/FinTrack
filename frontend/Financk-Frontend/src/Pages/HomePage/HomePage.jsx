@@ -1,8 +1,13 @@
-import React from 'react'
+import { useAuthentication } from '../../components/Authentication/AuthenticationProvider'
+import NavBar from '../../components/NavBar/NavBar'
 
 const HomePage = () => {
+  const { isAuthenticated } = useAuthentication()
   return (
-    <div>HomePage</div>
+    <>
+    <NavBar></NavBar>
+    <div>{isAuthenticated ? "Logged in" : "Please login" }</div>
+    </>
   )
 }
 

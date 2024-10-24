@@ -7,17 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.financk.financk_backend.auth.models.AuthenticationResponse;
 import org.financk.financk_backend.auth.models.AuthenticationDTO;
 import org.financk.financk_backend.auth.models.AuthenticationResult;
-import org.financk.financk_backend.auth.security.jwt.JWTUtils;
 import org.financk.financk_backend.auth.service.AuthenticationService;
 import org.financk.financk_backend.common.ServiceResult;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -93,8 +87,17 @@ public class AuthenticationController {
             return new ResponseEntity<>(new AuthenticationResponse(authenticationResult.getMessage(),authenticationResult.getUser()), HttpStatus.OK);
         }
         log.info("{} User is not authenticated", LOG_TITLE);
+        removeAuthCookie(response);
         return new ResponseEntity<>(new AuthenticationResponse(serviceResult.getErrorMessage()), HttpStatus.UNAUTHORIZED);
     }
+
+    @GetMapping("/logout")
+    public ResponseEntity<AuthenticationResponse> logoutUser(HttpServletRequest request, HttpServletResponse response) {
+        log.info("{} Logout request received", LOG_TITLE);
+        removeAuthCookie(response);
+        return new ResponseEntity<>(new AuthenticationResponse("User logged out successfully!"), HttpStatus.OK);
+    }
+
 
 
 
@@ -142,5 +145,16 @@ public class AuthenticationController {
         authCookie.setMaxAge(AUTH_COOKIE_EXPIRY);
         authCookie.setAttribute("SameSite","Lax");
         return authCookie;
+    }
+
+    private void removeAuthCookie(HttpServletResponse response) {
+        Cookie authCookie = new Cookie("authToken",null);
+        authCookie.setHttpOnly(true);
+        //TODO: HANDLE ONLY HTTPS TRAFFIC
+//                authCookie.setSecure(true);
+        authCookie.setPath("/");
+        authCookie.setMaxAge(0);
+        authCookie.setAttribute("SameSite","Lax");
+        response.addCookie(authCookie);
     }
 }
