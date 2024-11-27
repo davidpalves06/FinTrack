@@ -66,10 +66,6 @@ const RegisterPage = () => {
         setLastName('')
         setConfirmPassword('')
         setRegisterSuccess(true)
-
-        setTimeout(() => {
-          navigate('/login')
-        }, 1000)
       } else {
         setErrorMessage((await response.json()).message)
         setError(true)
@@ -82,13 +78,14 @@ const RegisterPage = () => {
     }
   }
 
-  const handleSnackBarClose = () => {
+  const handleSnackBarClose = (event,reason) => {
+    if (reason === 'clickaway') return;
     setError(false)
     setRegisterSuccess(false)
     setErrorMessage('')
   }
 
-  const handleHasAccount = (event) => {
+  const handleDirectToLogin = (event) => {
     event.preventDefault();
     navigate("/login")
   }
@@ -159,13 +156,13 @@ const RegisterPage = () => {
                   <AuthPassword id='Confirm-Password-input' type='password' label='Confirm Password' name='confirmPassword' error={!validPassword} value={confirmPassword} onChange={handleInputChange} required></AuthPassword>
                 </Grid2>
               </Grid2>
-              <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} open={error} key={'bottom' + 'center' + 'error'} onClose={handleSnackBarClose} autoHideDuration={2000} sx={{ width: 'fit-content', margin: 'auto auto' }}>
-                <Alert severity="warning" variant="filled" sx={{ width: '100%' }}>
+              <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} open={error} key={'bottom' + 'center' + 'error'} onClose={handleSnackBarClose} sx={{ width: 'fit-content', margin: 'auto auto' }}>
+                <Alert severity="warning" variant="filled" sx={{ width: '100%' }} onClose={handleSnackBarClose}>
                   {errorMessage}
                 </Alert>
               </Snackbar>
-              <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} open={registerSuccess} key={'bottom' + 'center' + 'success'} onClose={handleSnackBarClose} autoHideDuration={2000} sx={{ width: 'fit-content', margin: 'auto auto' }}>
-                <Alert severity="success" variant="filled" sx={{ width: '100%' }}>
+              <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} open={registerSuccess} key={'bottom' + 'center' + 'success'} onClose={handleSnackBarClose} sx={{ width: 'fit-content', margin: 'auto auto' }}>
+                <Alert severity="success" variant="filled" sx={{ width: '100%' }} onClose={handleDirectToLogin}>
                   <Typography variant='body' component='div'>Registed successfully!</Typography>
                 </Alert>
               </Snackbar>
@@ -177,7 +174,7 @@ const RegisterPage = () => {
               </PasswordRequirementsList>
               <Button type='submit' sx={{ margin: 'auto auto auto auto', color: 'white' }} variant='contained' color='primary'>Create Account</Button>
             </RegisterForm>
-            <Link href='/login' variant='body2' fontWeight='700' m='10px 10px' onClick={handleHasAccount}>Already have an account?</Link>
+            <Link href='/login' variant='body2' fontWeight='700' m='10px 10px' onClick={handleDirectToLogin}>Already have an account?</Link>
           </Paper>
         </Stack>
       </AuthContainer>

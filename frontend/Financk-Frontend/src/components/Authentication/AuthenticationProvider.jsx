@@ -5,9 +5,11 @@ const AuthenticationContext = createContext()
 const AuthenticationProvider = ({ children }) => {
     const [user, setUser] = useState(null)
     const [isAuthenticated, setAuthenticated] = useState(false)
+    const [isLoading, setLoading] = useState(true)
 
     const checkIfUserIsAuthenticated = async () => {
         try {
+            setLoading(true)
             const response = await fetch("http://localhost:8080/auth/check", {
                 method: 'GET',
                 credentials: 'include'
@@ -16,7 +18,9 @@ const AuthenticationProvider = ({ children }) => {
                 const responseBody = await response.json()
                 setUser(responseBody.user);
                 setAuthenticated(true)
+                setLoading(false)
             } else {
+                setLoading(false)
                 setAuthenticated(false)
                 setUser(null)
             }
@@ -24,6 +28,7 @@ const AuthenticationProvider = ({ children }) => {
         catch (error) {
             setAuthenticated(false)
             setUser(null)
+            setLoading(false)
         }
     }
 
@@ -66,7 +71,7 @@ const AuthenticationProvider = ({ children }) => {
     }, [])
 
     return (
-        <AuthenticationContext.Provider value={{ user, isAuthenticated, logout,login }}>
+        <AuthenticationContext.Provider value={{ user, isAuthenticated,isLoading, logout,login }}>
             {children}
         </AuthenticationContext.Provider>
     )

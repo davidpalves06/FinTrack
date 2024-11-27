@@ -99,22 +99,6 @@ public class AuthenticationController {
     }
 
 
-
-
-    @PostMapping("/oauth")
-    public ResponseEntity<AuthenticationResponse> oauthLogin(@RequestBody AuthenticationDTO authDTO) {
-        //TODO: OAuth User
-        boolean validated = AuthenticationRequestValidator.validateLoginDTO(authDTO);
-        if (validated) {
-            ServiceResult<AuthenticationResult> serviceResult = authenticationService.loginFinancialUser(authDTO);
-            if (serviceResult.isSuccess()) {
-                AuthenticationResult authenticationResult = serviceResult.getData();
-                return new ResponseEntity<>(new AuthenticationResponse(authenticationResult.getMessage(),authenticationResult.getUser()), HttpStatus.OK);
-            }
-        }
-        return new ResponseEntity<>(new AuthenticationResponse("Request Malformed"),HttpStatus.BAD_REQUEST);
-    }
-
     @PostMapping("/recover-password")
     public ResponseEntity<AuthenticationResponse> recoverPassword(@RequestBody AuthenticationDTO user) {
         //TODO: HANDLE THIS SCENARIO
