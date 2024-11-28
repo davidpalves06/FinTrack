@@ -14,4 +14,5 @@ public class MonthlyBudget {
     private float startingAmount;
     private float remainingAmount;
     private List<Expense> expenses;
+    private List<Income> incomes;
 }

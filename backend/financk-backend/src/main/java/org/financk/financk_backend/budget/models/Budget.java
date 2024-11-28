@@ -11,7 +11,7 @@ import java.util.UUID;
 public class Budget {
     private UUID id;
     private UUID userID;
+    private String budgetName;
     private Map<String,YearlyBudget> yearlyBudgets;
     private float monthlyStartingBalance;
-
 }
