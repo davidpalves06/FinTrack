@@ -2,6 +2,7 @@ package org.financk.financk_backend.budget.api;
 
 import lombok.extern.slf4j.Slf4j;
 import org.financk.financk_backend.budget.models.dto.BudgetDTO;
+import org.financk.financk_backend.budget.models.dto.BudgetItemDTO;
 import org.financk.financk_backend.budget.models.dto.BudgetResult;
 import org.financk.financk_backend.budget.models.dto.UserBudgetResult;
 import org.financk.financk_backend.budget.service.BudgetService;
@@ -23,57 +24,81 @@ public class BudgetController {
         this.budgetService = budgetService;
     }
 
-    @GetMapping
-    public ResponseEntity<String> budget() {
-        return ResponseEntity.ok("Budget");
-    }
-
-    @PostMapping
-    public ResponseEntity<BudgetResult> createBudget(@RequestBody BudgetDTO budgetDTO) {
-        if (budgetDTO.getMonthlyStartingBalance() < 0) {
-            return ResponseEntity.badRequest().build();
-        }
-        ServiceResult<BudgetResult> budgetServiceResult = budgetService.createBudget(budgetDTO);
-        return new ResponseEntity<>(budgetServiceResult.getData(), HttpStatus.CREATED);
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserBudgetResult> getUserBudget(@PathVariable("userId") UUID userId) {
+        log.info("{} Request to get user budgets received", LOG_TITLE);
+        ServiceResult<UserBudgetResult> serviceResult = budgetService.getUserBudgets(userId);
+        log.info("{} Request to get user budgets successful with response {}", LOG_TITLE,serviceResult.getData());
+        return new ResponseEntity<>(serviceResult.getData(), HttpStatus.OK);
     }
 
     @GetMapping("/{budgetId}")
     public ResponseEntity<BudgetResult> getBudget(@PathVariable("budgetId") UUID budgetId) {
+        log.info("{} Request to get budget with id {} received", LOG_TITLE,budgetId);
         ServiceResult<BudgetResult> serviceResult = budgetService.getBudget(budgetId);
         if (serviceResult.getErrorCode() == 1) {
+            log.info("{} Request to get budget with id {} failed due to not being able to find budget", LOG_TITLE,budgetId);
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
+        log.info("{} Request to get budget with id {} successful with response {}", LOG_TITLE,budgetId,serviceResult.getData());
         return new ResponseEntity<>(serviceResult.getData(), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{budgetId}")
-    public ResponseEntity<BudgetResult> deleteBudget(@PathVariable("budgetId") UUID budgetId) {
-        budgetService.deleteBudget(budgetId);
-        return ResponseEntity.noContent().build();
+
+    @PostMapping("/{budgetId}/expenses")
+    public ResponseEntity<String> addBudgetItem(@PathVariable("budgetId") UUID budgetId,@RequestBody BudgetItemDTO budgetItemDTO) {
+        log.info("{} Request to add budgetItem {} received", LOG_TITLE,budgetItemDTO);
+        ServiceResult<BudgetResult> serviceResult = budgetService.addBudgetItemToBudget(budgetId, budgetItemDTO);
+        if (serviceResult.isSuccess()) {
+            log.info("{} Request to add budget with id {} successful", LOG_TITLE,budgetId);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }
+        else {
+            log.info("{} Request to add budget with id {} failed", LOG_TITLE,budgetId);
+            return ResponseEntity.badRequest().build();
+        }
     }
 
-    @PostMapping("/{budgetId}/expense")
-    public ResponseEntity<String> addExpense(@PathVariable("budgetId") String budgetId) {
-        // TODO: Add Expense to budget
-        return ResponseEntity.ok("Budget");
+    @DeleteMapping("/{budgetId}/expenses/{itemId}")
+    public ResponseEntity<String> deleteBudgetItem(@PathVariable("budgetId") UUID budgetId,@PathVariable("itemId") UUID itemId) {
+        log.info("{} Request to delete budgetItem with id {} received", LOG_TITLE,itemId);
+        ServiceResult<String> serviceResult = budgetService.deleteBudgetItem(budgetId, itemId);
+        if (serviceResult.isSuccess()) {
+            log.info("{} Request to delete budgetItem with id {} successful", LOG_TITLE,itemId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        else {
+            log.info("{} Request to delete budgetItem with id {} failed", LOG_TITLE,itemId);
+            return ResponseEntity.badRequest().build();
+        }
     }
 
-    @DeleteMapping("/{budgetId}/expense")
-    public ResponseEntity<String> deleteExpense(@PathVariable("budgetId") String budgetId) {
-        // TODO: Delete expense from budget
-        return ResponseEntity.ok("Budget");
+    @PutMapping("/{budgetId}/expenses/{itemId}")
+    public ResponseEntity<String> updateBudgetItem(@PathVariable("budgetId") UUID budgetId,@PathVariable("itemId") UUID itemId,
+                                                   @RequestBody BudgetItemDTO budgetItemDTO) {
+        log.info("{} Request to update budgetItem {} received", LOG_TITLE,budgetItemDTO);
+        ServiceResult<String> serviceResult = budgetService.updateBudgetItem(budgetId,itemId, budgetItemDTO);
+        if (serviceResult.isSuccess()) {
+            log.info("{} Request to update budgetItem with id {} successful", LOG_TITLE,itemId);
+            return ResponseEntity.ok("");
+        }
+        else {
+            log.info("{} Request to update budgetItem with id {} failed", LOG_TITLE,itemId);
+            return ResponseEntity.badRequest().build();
+        }
     }
 
-    @PutMapping("/{budgetId}/expense")
-    public ResponseEntity<String> updateBudget(@PathVariable("budgetId") String budgetId) {
-        // TODO: Update expense from budget
-        return ResponseEntity.ok("Budget");
-    }
-
-
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserBudgetResult> getUserBudgets(@PathVariable("userId") UUID userId) {
-        ServiceResult<UserBudgetResult> serviceResult = budgetService.getUserBudgets(userId);
-        return new ResponseEntity<>(serviceResult.getData(), HttpStatus.OK);
+    @PutMapping("/{budgetId}")
+    public ResponseEntity<String> updateBudget(@PathVariable("budgetId") UUID budgetId, @RequestBody BudgetDTO budgetDTO) {
+        log.info("{} Request to update budget with id {} received", LOG_TITLE,budgetId);
+        ServiceResult<String> serviceResult = budgetService.updateBudget(budgetId,budgetDTO);
+        if (serviceResult.isSuccess()) {
+            log.info("{} Request to update budget with id {} successful", LOG_TITLE,budgetId);
+            return ResponseEntity.ok("");
+        }
+        else {
+            log.info("{} Request to update budget with id {} failed", LOG_TITLE,budgetId);
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

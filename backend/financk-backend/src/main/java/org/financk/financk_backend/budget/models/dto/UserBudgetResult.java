@@ -1,10 +1,12 @@
 package org.financk.financk_backend.budget.models.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class UserBudgetResult {
     private String message;
     private List<BudgetDTO> budgets;
