@@ -8,6 +8,7 @@ import java.time.LocalDate;
 @Data
 public class BudgetItemDTO {
     private ItemType itemType;
+    private String category;
     private Float itemAmount;
     private LocalDate itemDate;
 }

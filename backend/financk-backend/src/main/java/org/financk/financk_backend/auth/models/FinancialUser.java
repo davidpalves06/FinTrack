@@ -30,11 +30,6 @@ public class FinancialUser {
 
     private String password;
 
-    private float monthlyStartingBalance;
-
-    @OneToMany(mappedBy = "userId", fetch = FetchType.LAZY, cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<YearlyBudget> yearlyBudgets;
-
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private Date createdAt;

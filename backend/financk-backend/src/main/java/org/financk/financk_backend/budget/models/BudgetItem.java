@@ -16,6 +16,7 @@ public class BudgetItem {
     private UUID id;
     private UUID budgetId;
     private ItemType itemType;
+    private String category;
     private float itemAmount;
     private LocalDate itemDate;
 }
