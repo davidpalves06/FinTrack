@@ -11,7 +11,9 @@ import org.financk.financk_backend.budget.models.dto.UserBudgetResult;
 import org.financk.financk_backend.budget.repository.BudgetRepository;
 import org.financk.financk_backend.common.ServiceResult;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,6 +68,7 @@ public class BudgetService {
         if (optionalBudget.isPresent()) {
             Budget budget = optionalBudget.get();
             BudgetItem budgetItem = new BudgetItem();
+            budgetItem.setBudgetId(budgetId);
             budgetItem.setItemType(budgetItemDTO.getItemType());
             budgetItem.setItemDate(budgetItemDTO.getItemDate());
             budgetItem.setItemAmount(budgetItemDTO.getItemAmount());
@@ -84,11 +87,23 @@ public class BudgetService {
         }
     }
 
+    @Transactional
     public ServiceResult<String> deleteBudgetItem(UUID budgetId, UUID itemId) {
         Optional<Budget> optionalBudget = budgetRepository.findById(budgetId);
         if (optionalBudget.isPresent()) {
             Budget budget = optionalBudget.get();
-            budget.getBudgetItems().removeIf(budgetItem -> budgetItem.getId().equals(itemId));
+                Iterator<BudgetItem> iterator = budget.getBudgetItems().iterator();
+            while (iterator.hasNext()) {
+                BudgetItem budgetItem = iterator.next();
+                if (budgetItem.getId().equals(itemId)) {
+                    iterator.remove();
+                    if (budgetItem.getItemType().equals(ItemType.EXPENSE)) {
+                        budget.setCurrentAmount(budget.getCurrentAmount() + budgetItem.getItemAmount());
+                    } else {
+                        budget.setCurrentAmount(budget.getCurrentAmount() - budgetItem.getItemAmount());
+                    }
+                }
+            }
             budgetRepository.save(budget);
             return new ServiceResult<>(true,null,null,0);
         }
